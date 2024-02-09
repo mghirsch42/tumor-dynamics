@@ -4,7 +4,7 @@ from sklearn.metrics import r2_score
 from scipy.optimize import minimize, dual_annealing
 import pandas as pd
 import argparse
-import run_sim_functions
+import utils
 
 ##########
 # Calculates the base growth rate of the subline using the experiments with 
@@ -49,7 +49,7 @@ def main(exp_file, save_file):
         true_exp_params = {"a": row["a"], "b": row["b"], "c": row["c"]}
         params.update({"exp": exp, "id": row["id"]})
 
-        opt_results = dual_annealing(run_sim_functions.one_step_error_pure,
+        opt_results = dual_annealing(utils.one_step_error_pure,
                             x0 = [params["init_growVal"]],
                             args = (params["n"], params["init_totalPop"], true_exp_params),
                             bounds = params["bounds"],
@@ -60,6 +60,7 @@ def main(exp_file, save_file):
         results = update_results(results, exp, params, opt_results)
 
     results_df = pd.DataFrame.from_dict(results)
+    results_df = pd.merge(df, results_df, on="id")
     print(results_df)
     results_df.to_csv(save_file, index=False)
 

@@ -4,7 +4,7 @@ from sklearn.metrics import r2_score
 from scipy.optimize import minimize, dual_annealing
 import pandas as pd
 import argparse
-import run_sim_functions
+import utils
 
 
 def update_results(curr_results, exp, params, opt_results):
@@ -86,7 +86,7 @@ def main(exp_file, clone_intr_file, t_intr_pure_file, t_init_file, save_file):
         print(exp)
         true_exp_params = {"a": row["a"], "b": row["b"], "c": row["c"]}
         params.update({"exp": exp, "id": row["id"]})
-        params.update(run_sim_functions.get_init_R_S(params["init_totalPop"], exp))
+        params.update(utils.get_init_R_S(params["init_totalPop"], exp))
         
         grow_vals = {"avg_growR": params["avg_growR"], "avg_growS": params["avg_growS"]}
         params.update({"initT": params["init_totalPop"]*t_init_df[t_init_df["Exp"] == exp].reset_index().loc[0,"T_round"]})
@@ -94,7 +94,7 @@ def main(exp_file, clone_intr_file, t_intr_pure_file, t_init_file, save_file):
         init_pop_vals = {"initR": params["initR"], "initS": params["initS"], "initT": params["initT"]}
         intr_vals = {"avg_intrRS": params["avg_intrRS"], "avg_intrSR": params["avg_intrSR"]}
 
-        opt_results = dual_annealing(run_sim_functions.one_step_error_t,
+        opt_results = dual_annealing(utils.one_step_error_t,
                         x0 = [params["init_growT"], params["init_intrRT"], params["init_intrST"],
                               params["init_intrTR"], params["init_intrTS"]],
                         args = (params["n"], grow_vals, init_pop_vals, intr_vals, true_exp_params),
@@ -107,10 +107,12 @@ def main(exp_file, clone_intr_file, t_intr_pure_file, t_init_file, save_file):
         
     results_df = pd.DataFrame.from_dict(results)
     pure_results = pd.read_csv(t_intr_pure_file)
+    print(results_df)
+    print(pure_results)
+    results_df = pd.merge(df, results_df, on="id")
+    print(results_df)
     results_df = pd.concat([pure_results, results_df])
     print(results_df)
-
-    # results_df = pd.merge(df, results_df, on="id")
     results_df.to_csv(save_file, index=False)
 
 if __name__ == "__main__":

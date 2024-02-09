@@ -4,13 +4,12 @@ from sklearn.metrics import r2_score
 import pandas as pd
 import argparse
 import json
+import utils
 
 ##########
 # Estimate basic function parameters based on the true data, one for each experiment
 ##########
 
-def exp_funct(data, a, b, c):
-    return a * np.exp(b*data) + c
 
 def main(data_file, save_file):
     params = {
@@ -47,11 +46,11 @@ def main(data_file, save_file):
         print(row)
         ydata = row[2]
         xdata = days[0:len(ydata)]
-        popt, pcov = curve_fit(exp_funct, xdata, ydata, 
+        popt, pcov = curve_fit(utils.exp_funct, xdata, ydata, 
                         p0=(params["init_a"], params["init_b"], params["init_c"]), 
                         bounds=([params["bounds_a"][0], params["bounds_b"][0], params["bounds_c"][0]], 
                                 [params["bounds_a"][1], params["bounds_b"][1], params["bounds_c"][1]]))
-        opt_line = [exp_funct(x, popt[0], popt[1], popt[2]) for x in xdata]
+        opt_line = [utils.exp_funct(x, popt[0], popt[1], popt[2]) for x in xdata]
         r = r2_score(ydata, opt_line)
         results.append([row[0], row[1]] + list(popt) + [r])
 

@@ -4,7 +4,7 @@ from sklearn.metrics import r2_score
 from scipy.optimize import minimize, dual_annealing
 import pandas as pd
 import argparse
-import run_sim_functions
+import utils
 
 def update_results(curr_results, exp, params, opt_results):
     curr_results["exp"].append(params["exp"])
@@ -96,7 +96,7 @@ def main(exp_file, clone_intr_file, t_init_file, save_file):
 
         if "A1" in exp:
             params.update({"initR": 0, "initS": params["init_totalPop"]})
-            opt_results = dual_annealing(run_sim_functions.one_step_error_t_pure,
+            opt_results = dual_annealing(utils.one_step_error_t_pure,
                             x0 = [params["init_growT"], params["init_intrST"], params["init_intrTS"]],
                             args = (params["n"], params["initS"], params["initT"], 
                                     grow_vals["avg_growS"], true_exp_params),
@@ -106,7 +106,7 @@ def main(exp_file, clone_intr_file, t_init_file, save_file):
                             )
         else:
             params.update({"initR": params["init_totalPop"], "initS": 0})
-            opt_results = dual_annealing(run_sim_functions.one_step_error_t_pure,
+            opt_results = dual_annealing(utils.one_step_error_t_pure,
                             x0 = [params["init_growT"], params["init_intrRT"], params["init_intrTR"]],
                             args = (params["n"], params["initR"], params["initT"], 
                                     grow_vals["avg_growR"], true_exp_params),
@@ -117,8 +117,8 @@ def main(exp_file, clone_intr_file, t_init_file, save_file):
         results = update_results(results, exp, params, opt_results)
         
     results_df = pd.DataFrame.from_dict(results)
+    results_df = pd.merge(df, results_df, on="id")
     print(results_df)
-    # results_df = pd.merge(df, results_df, on="id")
     results_df.to_csv(save_file, index=False)
 
 
