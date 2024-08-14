@@ -68,14 +68,10 @@ def main():
 
     # Loop through all combinations for g1 and g11 and get the r2 score
     for i in range(0, len(g1s)):
-        # print("i:", i)
         for j in range(0, len(g11s)):
-            # print("\tj:", j)
-            # print("\t\tg1:", g1s[i], "g11:", g11s[j])
             score = run([c1_init, c11_init], g1s[i], g11s[j], true_df[true_df["group"] == group])
             r2_scores[i*len(g1s)+j] = [g1s[i], g11s[j], score]
-    # score = run([c1_init, c11_init], 0.1, 0.1, true_df[true_df["group"] == "Grp. A2 B6 (80% C1; 20% C11)"])
-    print(r2_scores)
+
     r2_df = pd.DataFrame(r2_scores, columns=["g1", "g11", "r2_score"])
     r2_df = pd.pivot(r2_df, index="g1", columns="g11", values="r2_score")
     r2_df.index = [round(r, 3) for r in r2_df.index]
@@ -84,7 +80,6 @@ def main():
     print(r2_df)
     plt.figure(figsize=(10,7))
     sns.heatmap(r2_df, cmap="hot", annot=False)
-    # plt.vlines(x=[c11_opt], ymin=plt.ylim()[0], ymax=plt.ylim()[1])
     # plt.axvline(x=c11_opt_loc)
     # plt.axhline(y=c1_opt_loc)
     plt.title(group)
